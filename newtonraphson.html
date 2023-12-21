@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newton Raphson Method</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Set a background color for the body */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1c1c1c; /* Set a background color for the header */
+            color: #ffffff; /* Set text color for the header */
+            padding: 10px;
+            text-align: center;
+        }
+
+        main {
+            flex: 1; /* Expand main to fill the available space */
+            padding: 20px;
+            margin: 20px;
+            background-color: #ffffff; /* Set a background color for the main content */
+            border-radius: 8px; /* Add some border-radius for a cleaner look */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+        }
+
+        h1 {
+            color: #ffffff; /* Set a custom color for the heading */
+            margin-bottom: 20px; /* Add some space below the heading */
+        }
+
+        form {
+            width: 100%;
+            max-width: 400px; /* Set a maximum width for the form */
+            margin-bottom: 20px; /* Add some space below the form */
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%; /* Make the button full-width */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #1c1c1c; /* Set a background color for the footer */
+            color: #ffffff; /* Set text color for the footer */
+            padding: 10px;
+            text-align: center;
+        }
+        .description{
+            max-width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Newton Raphson Method</h1>
+    </header>
+
+    <main>
+        <div class="description">
+            <p>Newton's method, or the Newton–Raphson method, jointly named after Isaac Newton and Joseph Raphson, is a numerical analysis powerhouse. This method serves as a guiding light in the pursuit of roots (or zeroes) of real-valued functions, progressively refining our approximations.</p>
+
+            <p>In essence, Newton's method, affectionately known as the dance of iteration, swiftly leads us to a close approximation of the root (\(f(x) = 0\)). Its brilliance lies in the profound link between continuous and differentiable functions and the elegant use of tangent lines.</p>
+
+            <p>Picture the function as a terrain, and Newton's method as our adept guide. It skillfully places a tangent line on the curve, a shortcut that points directly to the root's location. With each iteration, we get closer to the heart of the function, unraveling the true identity of the root.</p>
+        </div>
+        <form id="newtonRaphsonForm">
+            <h2 style="text-align: center; padding: 2rem">Calculator</h2>
+
+            <label for="degree">Enter the degree of the polynomial:</label>
+            <input type="number" id="degree" required><br><br>
+
+            <label for="initialGuess">Initial Guess for the Root:</label>
+            <input type="number" id="initialGuess" required><br><br>
+
+            <label for="tolerance">Input for Tolerance:</label>
+            <input type="number" id="tolerance" step="any" required><br><br>
+
+            <button type="button" onclick="runNewtonRaphson()">Run Newton Raphson Method</button>
+        </form>
+
+        <div id="output"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 All rights reserved.</p>
+    </footer>
+
+    <script>
+        function askCoefficients(degree) {
+            console.log("Enter the coefficient for: ");
+
+            let coefficients = [];
+            for (let i = degree; i >= 0; i--) {
+                coefficients.push(parseFloat(prompt(`Enter the coefficient for x^${i}:`)));
+            }
+
+            return coefficients;
+        }
+
+        function findDerivative(coefficients, degree) {
+            console.log("\nDifferentiating the equation...\n");
+
+            let derivative = [];
+            for (let i = 1; i <= degree; i++) {
+                derivative.push(i * coefficients[i]);
+            }
+
+            return derivative;
+        }
+
+        function computeFunction(coefficients, degree, value) {
+            let ans = 0;
+            for (let i = 0; i <= degree; i++) {
+                ans += Math.pow(value, i) * coefficients[i];
+            }
+            return ans;
+        }
+
+        function newtonRaphson(initialGuess, tolerance, fOfX, gOfX, degree) {
+            let x0 = initialGuess, x1;
+            let step = 0;
+            let results = [];
+
+            do {
+                ++step;
+                let fVal = computeFunction(fOfX, degree, x0);
+                let gVal = computeFunction(gOfX, degree - 1, x0);
+
+                if (gVal === 0) {
+                    console.log(`\nDerivative undefined for equation at x = ${x0}`);
+                    return 0;
+                }
+
+                console.log(`Iteration ${step} :`);
+                console.log(`  x${step}: ${x0}`);
+                console.log(`  f${step}: ${fVal}`);
+                console.log(`  f${step}': ${gVal}`);
+
+                x1 = x0 - (fVal / gVal);
+                console.log(`  x${step + 1}: ${x1}`);
+                results.push({
+                    iteration: step,
+                    x0: x0,
+                    x1: x1,
+                    fVal: fVal,
+                    gVal: gVal
+                });
+                x0 = x1;
+
+            } while (Math.abs(computeFunction(fOfX, degree, x1)) > tolerance);
+
+            return results;
+        }
+
+        function runNewtonRaphson() {
+            const degree = parseInt(document.getElementById('degree').value);
+            const coefficients = askCoefficients(degree);
+            const derivative = findDerivative(coefficients, degree);
+
+            const initialGuess = parseFloat(document.getElementById('initialGuess').value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+
+            const results = newtonRaphson(initialGuess, tolerance, coefficients, derivative, degree);
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = "";
+
+            const ul = document.createElement('ul');
+            results.forEach(result => {
+                const li = document.createElement('li');
+                li.innerHTML = `Iteration ${result.iteration}:<br>
+                                x${result.iteration - 1}: ${result.x0}<br>
+                                f${result.iteration}: ${result.fVal}<br>
+                                f${result.iteration}': ${result.gVal}<br>
+                                x${result.iteration}: ${result.x1}<br><br>`;
+                ul.appendChild(li);
+            });
+
+            outputDiv.appendChild(ul);
+        }
+    </script>
+
+</body>
+
+</html>

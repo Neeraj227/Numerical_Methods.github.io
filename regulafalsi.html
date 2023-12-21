@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regula-Falsi Method</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Set a background color for the body */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1c1c1c; /* Set a background color for the header */
+            color: #ffffff; /* Set text color for the header */
+            padding: 10px;
+            text-align: center;
+        }
+
+        main {
+            flex: 1; /* Expand main to fill the available space */
+            padding: 20px;
+            margin: 20px;
+            background-color: #ffffff; /* Set a background color for the main content */
+            border-radius: 8px; /* Add some border-radius for a cleaner look */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+        }
+
+        h1 {
+            color: #ffffff; /* Set a custom color for the heading */
+            margin-bottom: 20px; /* Add some space below the heading */
+        }
+
+        form {
+            width: 100%;
+            max-width: 400px; /* Set a maximum width for the form */
+            margin-bottom: 20px; /* Add some space below the form */
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%; /* Make the button full-width */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #1c1c1c; /* Set a background color for the footer */
+            color: #ffffff; /* Set text color for the footer */
+            padding: 10px;
+            text-align: center;
+        }
+        .description{
+            max-width: 80%;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Regula-Falsi Method</h1>
+    </header>
+
+    <main>
+        <div class="description">
+            <p>The Regula Falsi method, often referred to as the method of false position, emerges as a seasoned player in the numerical realm, specializing in the solution of single-variable equations. Its roots intertwine with the classic bisection method, but it steps forward as a seasoned alternative, designed to counter the leisurely pace of its predecessor.</p>
+
+            <p>In essence, the method unfolds as a trial-and-error ballet. Test values are summoned, tried on for size, and adjusted based on their performance. This dance, though old in its essence, still retains its charm and efficacy in gracefully navigating the equation's terrain. It's a nuanced strategy, a calculated artistry in the world of numerical problem-solving.</p>
+        </div>
+        <form id="regulaFalsiForm">
+            <h2 style="text-align: center; padding: 2rem">Calculator</h2>
+
+            <label for="degree">Enter the degree of the polynomial:</label>
+            <input type="number" id="degree" required><br>
+
+            <p>Input for Root Interval:</p>
+            <label for="lowerBoundary">&nbsp&nbsp&nbsp&nbsp Lower Boundary Point:</label>
+            <input type="number" id="lowerBoundary" required><br>
+
+            <label for="upperBoundary">&nbsp&nbsp&nbsp&nbsp Upper Boundary Point:</label>
+            <input type="number" id="upperBoundary" required><br><br>
+
+            <button type="button" onclick="runRegulaFalsi()">Run Regula-Falsi Method</button>
+        </form>
+
+        <div id="output"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 All rights reserved.</p>
+    </footer>
+
+    <script>
+        function askCoefficients(degree) {
+            let coefficients = [];
+            for (let i = degree; i >= 0; i--) {
+                coefficients.push(parseFloat(prompt(`Enter the coefficient for x^${i}:`)));
+            }
+            return coefficients;
+        }
+
+        function computeFunction(coefficients, degree, value) {
+            let ans = 0;
+            for (let i = 0; i <= degree; i++) {
+                ans += coefficients[i] * Math.pow(value, degree - i);
+            }
+            return ans;
+        }
+
+        function regulaFalsi(degree, coefficients, iterations, x0, x1) {
+            if (computeFunction(coefficients, degree, x0) * computeFunction(coefficients, degree, x1) > 0) {
+                return "Invalid interval. The function values at the boundaries have the same sign.";
+            }
+
+            let x2;
+            let step = 0;
+            let result = "";
+            do {
+                step++;
+
+                let f0 = computeFunction(coefficients, degree, x0);
+                let f1 = computeFunction(coefficients, degree, x1);
+                let firstExp = (x1 - x0) / (f1 - f0);
+
+                x2 = x1 - (f1 * firstExp);
+                let f2 = computeFunction(coefficients, degree, x2);
+
+                result += `<p>Iteration ${step}:</p>`;
+                result += `<ul>`;
+                result += `<li>x${step - 1}: ${x0}</li>`;
+                result += `<li>x${step}: ${x1}</li>`;
+                result += `<li>x${step + 1}: ${x2}</li>`;
+                result += `<li>f${step - 1}: ${f0}</li>`;
+                result += `<li>f${step}: ${f1}</li>`;
+                result += `<li>f${step + 1}: ${f2}</li>`;
+                result += `</ul>`;
+                
+                if ((f0 > 0 && f1 < 0) || (f0 < 0 && f1 > 0)) {
+                    if (f2 < 0) {
+                        if (f0 < 0) {
+                            x0 = x2;
+                        } else {
+                            x1 = x2;
+                        }
+                    } else if (f2 > 0) {
+                        if (f0 > 0) {
+                            x0 = x2;
+                        } else {
+                            x1 = x2;
+                        }
+                    }
+                } else {
+                    return "Invalid interval. The function values at the boundaries have the same sign.";
+                }
+
+            } while (step < iterations);
+
+            return result;
+        }
+
+        function runRegulaFalsi() {
+            const degree = parseInt(document.getElementById('degree').value);
+            const lowerBoundary = parseFloat(document.getElementById('lowerBoundary').value);
+            const upperBoundary = parseFloat(document.getElementById('upperBoundary').value);
+
+            const coefficients = askCoefficients(degree);
+
+            const result = regulaFalsi(degree, coefficients, 5, lowerBoundary, upperBoundary);
+
+            displayResult(result);
+        }
+
+        function displayResult(result) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = "";
+
+            if (typeof result === 'string') {
+                outputDiv.innerHTML = `<p>${result}</p>`;
+            } else {
+                outputDiv.innerHTML = result;
+            }
+        }
+
+        // Dynamically create input fields for coefficients based on the degree
+        const degreeInput = document.getElementById('degree');
+        const coefficientsInput = document.getElementById('coefficientsInput');
+
+        degreeInput.addEventListener('change', () => {
+            const degree = parseInt(degreeInput.value);
+            coefficientsInput.innerHTML = ""; // Clear previous inputs
+
+            for (let i = degree; i >= 0; i--) {
+                const label = document.createElement('label');
+                label.setAttribute('for', `coeff${i}`);
+                label.textContent = `Enter the coefficient for x^${i}:`;
+
+                const input = document.createElement('input');
+                input.setAttribute('type', 'number');
+                input.setAttribute('id', `coeff${i}`);
+                input.setAttribute('required', 'true');
+
+                coefficientsInput.appendChild(label);
+                coefficientsInput.appendChild(input);
+                coefficientsInput.appendChild(document.createElement('br'));
+            }
+        });
+    </script>
+
+</body>
+
+</html>

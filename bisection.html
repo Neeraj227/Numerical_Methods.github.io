@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bisection Method</title>
+    <style>
+        body {
+            font-family:'Times New Roman', Times, serif;
+
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Set a background color for the body */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1c1c1c; /* Set a background color for the header */
+            color: #ffffff; /* Set text color for the header */
+            padding: 10px;
+            text-align: center;
+        }
+
+        main {
+            flex: 1; /* Expand main to fill the available space */
+            padding: 20px;
+            margin: 20px;
+            background-color: #ffffff; /* Set a background color for the main content */
+            border-radius: 8px; /* Add some border-radius for a cleaner look */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+        }
+
+        h1 {
+            color: #ffffff; /* Set a custom color for the heading */
+            margin-bottom: 20px; /* Add some space below the heading */
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        form {
+            width: 100%;
+            max-width: 400px; /* Set a maximum width for the form */
+            margin-bottom: 20px; /* Add some space below the form */
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            width: 100%; /* Make the button full-width */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #1c1c1c; /* Set a background color for the footer */
+            color: #ffffff; /* Set text color for the footer */
+            padding: 10px;
+            text-align: center;
+        }
+        .description{
+            max-width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bisection Method</h1>
+    </header>
+
+    <main>
+        <div class="description">
+            <p>In Mathematics, the bisection method is a straightforward technique to find numerical solutions of an equation with one unknown. The Bisection Method is a successive approximation method that narrows down an interval that contains a root of the function \(f(x)\). It is a simple method, and it is relatively slow.</p>
+
+            <p><strong>Start in the Right Zone:</strong> Begin with an interval [a, b] where the function changes sign (\(f(a) \cdot f(b) < 0\))—this sets the stage for finding the elusive root.</p>
+
+            <p><strong>Meet at the Middle:</strong> Introduce the midpoint \(c = \frac{a + b}{2}\) in each iteration. This is where the magic happens—signs are evaluated to decide which subinterval cradles the root.</p>
+
+            <p><strong>Closing In:</strong> Keep repeating until the grand convergence moment. It's like zooming in on a target, getting closer to the accurate solution.</p>
+
+            <p><strong>Convergence Charm:</strong> Admire the linear convergence—it consistently narrows down the error, step by step, iteration by iteration.</p>
+
+            <p><strong>Trust the Process:</strong> The bisection method is reliable; it guarantees convergence, provided you choose your initial interval wisely and deal with a continuous function.</p>
+
+            <p><strong>Application Insight:</strong> Perfect for pinpointing a single root within an interval, though it might take a bit more effort for functions with multiple roots or when your root is playing near the interval boundaries.</p>
+        </div>
+
+        <form id="bisectionForm">
+            <h2 style="text-align: center; padding: 2rem">Calculator</h2>
+            <label for="degree">Enter the degree of the polynomial:</label>
+            <input type="number" id="degree" required><br>
+
+            <p>Input for Root Interval:</p>
+            <label for="lowerBoundary">&nbsp&nbsp&nbsp&nbsp Lower Boundary Point:</label>
+            <input type="number" id="lowerBoundary" required><br>
+
+            <label for="upperBoundary">&nbsp&nbsp&nbsp&nbsp Upper Boundary Point:</label>
+            <input type="number" id="upperBoundary" required><br><br>
+
+            <label for="errorTolerance">Error Tolerance:</label>
+            <input type="number" id="errorTolerance" required step="any"><br><br>
+
+            <button type="button" onclick="runBisection()">Run Bisection Method</button>
+        </form>
+
+        <div id="output"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 All rights reserved.</p>
+    </footer>
+
+    <script>
+        function askCoefficients(degree) {
+            let coefficients = [];
+            for (let i = degree; i >= 0; i--) {
+                coefficients.push(parseFloat(prompt(`Enter the coefficient for x^${i}:`)));
+            }
+            return coefficients;
+        }
+
+        function computeFunction(coefficients, degree, value) {
+            let ans = 0;
+            for (let i = 0; i <= degree; i++) {
+                ans += coefficients[i] * Math.pow(value, degree - i);
+            }
+            return ans;
+        }
+
+        function bisectionMethod(degree, coefficients, TOLERANCE, a, b) {
+            if (computeFunction(coefficients, degree, a) * computeFunction(coefficients, degree, b) > 0) {
+                return "Invalid interval. The function values at the boundaries have the same sign.";
+            }
+
+            let c;
+            let iterations = [];
+            do {
+                c = (a + b) / 2;
+
+                let A = computeFunction(coefficients, degree, a);
+                let B = computeFunction(coefficients, degree, b);
+                let C = computeFunction(coefficients, degree, c);
+
+                iterations.push({
+                    iteration: iterations.length + 1,
+                    a,
+                    b,
+                    c,
+                    A,
+                    B,
+                    C
+                });
+
+                if ((A > 0 && B < 0) || (A < 0 && B > 0)) {
+                    if (C < 0) {
+                        if (A < 0) {
+                            a = c;
+                        } else {
+                            b = c;
+                        }
+                    } else if (C > 0) {
+                        if (A > 0) {
+                            a = c;
+                        } else {
+                            b = c;
+                        }
+                    }
+                } else {
+                    return "Invalid interval. The function values at the boundaries have the same sign.";
+                }
+
+            } while (((b - a) / 2) > TOLERANCE);
+
+            return iterations;
+        }
+
+        function runBisection() {
+            const degree = parseInt(document.getElementById('degree').value);
+            const lowerBoundary = parseFloat(document.getElementById('lowerBoundary').value);
+            const upperBoundary = parseFloat(document.getElementById('upperBoundary').value);
+            const errorTolerance = parseFloat(document.getElementById('errorTolerance').value);
+
+            const coefficients = askCoefficients(degree);
+
+            const iterations = bisectionMethod(degree, coefficients, errorTolerance, lowerBoundary, upperBoundary);
+
+            displayResult(iterations);
+        }
+
+        function displayResult(iterations) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = "";
+
+            if (typeof iterations === 'string') {
+                outputDiv.innerHTML = `<p>${iterations}</p>`;
+            } else {
+                iterations.forEach(iteration => {
+                    outputDiv.innerHTML += `
+                        <p>Iteration ${iteration.iteration}:</p>
+                        <ul>
+                            <li>A: ${iteration.a}</li>
+                            <li>B: ${iteration.b}</li>
+                            <li>C: ${iteration.c}</li>
+                            <li>Value at A: ${iteration.A}</li>
+                            <li>Value at B: ${iteration.B}</li>
+                            <li>Value at C: ${iteration.C}</li>
+                        </ul>
+                    `;
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
